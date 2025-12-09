@@ -77,3 +77,4 @@ const Badge: React.FC<BadgeProps> = ({ type, value, className = '' }) => {
 
 export default Badge;
 
+

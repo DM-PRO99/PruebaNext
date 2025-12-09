@@ -345,10 +345,10 @@ Para probar el sistema:
 
 ## 📝 Datos del Coder
 
-- **Nombre**: [Tu Nombre]
-- **Clan**: [Tu Clan]
-- **Correo**: [Tu Correo]
-- **Documento de Identidad**: [Tu Documento]
+- **Nombre**: Diego Alejandro Mena Ciceri
+- **Clan**: Gosling
+- **Correo**: diegomena903@gmail.com
+- **Documento de Identidad**: 1109290022
 
 ## 📄 Licencia
 
