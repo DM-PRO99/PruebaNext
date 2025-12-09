@@ -5,10 +5,23 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ticket } from '@/types';
-import { ticketService } from '@/services/api';
-import Card from '@/components/ui/Card';
+import { ticketService, commentService } from '@/services/api';
 import Button from '@/components/ui/Button';
-import { TicketIcon, ArrowRightOnRectangleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import Badge from '@/components/ui/Badge';
+import AgentSidebar from '@/components/AgentSidebar';
+import { 
+  PlusIcon, 
+  ArrowPathIcon, 
+  FunnelIcon, 
+  BellIcon,
+  ClockIcon,
+  ChatBubbleLeftRightIcon,
+  UserIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ArrowTrendingUpIcon,
+  TicketIcon
+} from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 export default function AgentDashboard() {
@@ -17,7 +30,9 @@ export default function AgentDashboard() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState<{ status?: string; priority?: string }>({});
+  const [activeStatusTab, setActiveStatusTab] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [commentsCount, setCommentsCount] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,11 +46,37 @@ export default function AgentDashboard() {
     if (user && user.role === 'agent') {
       loadTickets();
     }
-  }, [user, filters]);
+  }, [user, activeStatusTab, priorityFilter]);
+
+  useEffect(() => {
+    // Load comments count for each ticket
+    const loadCommentsCount = async () => {
+      const counts: Record<string, number> = {};
+      for (const ticket of tickets) {
+        try {
+          const comments = await commentService.getByTicket(ticket._id);
+          counts[ticket._id] = comments.length;
+        } catch (err) {
+          counts[ticket._id] = 0;
+        }
+      }
+      setCommentsCount(counts);
+    };
+    if (tickets.length > 0) {
+      loadCommentsCount();
+    }
+  }, [tickets]);
 
   const loadTickets = async () => {
     try {
       setIsLoading(true);
+      const filters: any = {};
+      if (activeStatusTab !== 'all') {
+        filters.status = activeStatusTab;
+      }
+      if (priorityFilter !== 'all') {
+        filters.priority = priorityFilter;
+      }
       const data = await ticketService.getAll(filters);
       setTickets(data);
     } catch (err: any) {
@@ -51,34 +92,40 @@ export default function AgentDashboard() {
     router.push(`/agent/tickets/${ticketId}`);
   };
 
-  const handleUpdateStatus = async (ticketId: string, newStatus: string) => {
-    try {
-      await ticketService.update(ticketId, { status: newStatus as any });
-      toast.success('Estado del ticket actualizado');
-      loadTickets();
-    } catch (err: any) {
-      const errorMsg = err.message || 'Error al actualizar ticket';
-      setError(errorMsg);
-      toast.error(errorMsg);
-    }
+  const formatTimeAgo = (date: Date | string) => {
+    const now = new Date();
+    const ticketDate = new Date(date);
+    const diffInHours = Math.floor((now.getTime() - ticketDate.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Hace menos de 1 hora';
+    if (diffInHours < 24) return `Hace ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return 'Hace 1 día';
+    if (diffInDays < 7) return `Hace ${diffInDays} días`;
+    
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks === 1) return 'Hace 1 semana';
+    if (diffInWeeks < 4) return `Hace ${diffInWeeks} semanas`;
+    
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths === 1) return 'Hace 1 mes';
+    return `Hace ${diffInMonths} meses`;
   };
 
-  const handleFilterChange = (key: 'status' | 'priority', value: string) => {
-    if (value === 'all') {
-      const newFilters = { ...filters };
-      delete newFilters[key];
-      setFilters(newFilters);
-    } else {
-      setFilters({ ...filters, [key]: value });
+  const getAssignedName = (ticket: Ticket) => {
+    if (typeof ticket.assignedTo === 'object' && ticket.assignedTo?.name) {
+      return ticket.assignedTo.name;
     }
+    return 'Sin asignar';
   };
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <p className="mt-4 text-white">Cargando...</p>
         </div>
       </div>
     );
@@ -94,162 +141,221 @@ export default function AgentDashboard() {
     inProgress: tickets.filter(t => t.status === 'in_progress').length,
     resolved: tickets.filter(t => t.status === 'resolved').length,
     closed: tickets.filter(t => t.status === 'closed').length,
+    highPriority: tickets.filter(t => t.priority === 'high').length,
   };
 
+  const statusTabs = [
+    { value: 'all', label: 'Todos', count: stats.total },
+    { value: 'open', label: 'Abiertos', count: stats.open },
+    { value: 'in_progress', label: 'En Progreso', count: stats.inProgress },
+    { value: 'resolved', label: 'Resueltos', count: stats.resolved },
+    { value: 'closed', label: 'Cerrados', count: stats.closed },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <nav className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <ChartBarIcon className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Panel Agente
-              </h1>
+    <div className="min-h-screen flex bg-slate-900">
+      <AgentSidebar />
+      
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-slate-800 border-b border-slate-700 px-8 py-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-1">Dashboard</h1>
+              <p className="text-slate-400">Gestiona todos los tickets de soporte</p>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700">Hola, <span className="text-indigo-600">{user.name}</span></span>
+            <div className="flex items-center gap-3">
+              <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+                <ArrowPathIcon className="h-5 w-5" />
+              </button>
+              <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+                <FunnelIcon className="h-5 w-5" />
+              </button>
+              <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
+                <BellIcon className="h-5 w-5" />
+                <span className="absolute top-1 right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-slate-800"></span>
+              </button>
               <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  toast.success('Sesión cerrada');
-                  router.push('/login');
-                }}
+                variant="primary" 
+                onClick={() => router.push('/client/dashboard')}
                 className="flex items-center gap-2"
               >
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                Salir
+                <PlusIcon className="h-5 w-5" />
+                + Nuevo Ticket
               </Button>
             </div>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>
-          <p className="text-gray-600">Vista general de todos los tickets</p>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8"
-        >
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-white rounded-xl shadow-lg p-6 border border-gray-200"
-          >
-            <p className="text-sm font-medium text-gray-600 mb-1">Total</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-lg p-6 border border-blue-200"
-          >
-            <p className="text-sm font-medium text-blue-700 mb-1">Abiertos</p>
-            <p className="text-3xl font-bold text-blue-600">{stats.open}</p>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-lg p-6 border border-yellow-200"
-          >
-            <p className="text-sm font-medium text-yellow-700 mb-1">En Progreso</p>
-            <p className="text-3xl font-bold text-yellow-600">{stats.inProgress}</p>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-lg p-6 border border-green-200"
-          >
-            <p className="text-sm font-medium text-green-700 mb-1">Resueltos</p>
-            <p className="text-3xl font-bold text-green-600">{stats.resolved}</p>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl shadow-lg p-6 border border-gray-200"
-          >
-            <p className="text-sm font-medium text-gray-700 mb-1">Cerrados</p>
-            <p className="text-3xl font-bold text-gray-600">{stats.closed}</p>
-          </motion.div>
-        </motion.div>
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto p-8">
+          {/* KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-slate-800 rounded-xl p-6 border border-slate-700"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-slate-400 text-sm mb-1">Tickets Totales</p>
+                  <p className="text-4xl font-bold text-white">{stats.total}</p>
+                </div>
+                <div className="bg-blue-500/20 p-2 rounded-lg">
+                  <TicketIcon className="h-6 w-6 text-blue-400" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-green-400 text-sm">
+                <ArrowTrendingUpIcon className="h-4 w-4" />
+                <span>+12%</span>
+                <span className="text-slate-400">Este mes</span>
+              </div>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-200"
-        >
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Filtros</h3>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-              <select
-                value={filters.status || 'all'}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              >
-                <option value="all">Todos</option>
-                <option value="open">Abierto</option>
-                <option value="in_progress">En Progreso</option>
-                <option value="resolved">Resuelto</option>
-                <option value="closed">Cerrado</option>
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Prioridad</label>
-              <select
-                value={filters.priority || 'all'}
-                onChange={(e) => handleFilterChange('priority', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              >
-                <option value="all">Todas</option>
-                <option value="low">Baja</option>
-                <option value="medium">Media</option>
-                <option value="high">Alta</option>
-              </select>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-slate-800 rounded-xl p-6 border border-slate-700"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-slate-400 text-sm mb-1">Tickets Abiertos</p>
+                  <p className="text-4xl font-bold text-white">{stats.open}</p>
+                </div>
+                <div className="bg-yellow-500/20 p-2 rounded-lg">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-yellow-400" />
+                </div>
+              </div>
+              <p className="text-yellow-400 text-sm">Requieren atención</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-slate-800 rounded-xl p-6 border border-slate-700"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-slate-400 text-sm mb-1">Tiempo Promedio</p>
+                  <p className="text-4xl font-bold text-white">4.2h</p>
+                </div>
+                <div className="bg-blue-500/20 p-2 rounded-lg">
+                  <ClockIcon className="h-6 w-6 text-blue-400" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-green-400 text-sm">
+                <ArrowTrendingUpIcon className="h-4 w-4" />
+                <span>+8%</span>
+                <span className="text-slate-400">Primera respuesta</span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-slate-800 rounded-xl p-6 border border-slate-700"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-slate-400 text-sm mb-1">Resueltos</p>
+                  <p className="text-4xl font-bold text-white">{stats.resolved}</p>
+                </div>
+                <div className="bg-green-500/20 p-2 rounded-lg">
+                  <CheckCircleIcon className="h-6 w-6 text-green-400" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-green-400 text-sm">
+                <ArrowTrendingUpIcon className="h-4 w-4" />
+                <span>+23%</span>
+                <span className="text-slate-400">Este mes</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Filters */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-2 border-b border-slate-700">
+                {statusTabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => setActiveStatusTab(tab.value)}
+                    className={`px-4 py-2 font-medium transition-colors ${
+                      activeStatusTab === tab.value
+                        ? 'text-blue-400 border-b-2 border-blue-400'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {tab.label} {tab.count}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">Prioridad:</span>
+                <select
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todas</option>
+                  <option value="high">Alta</option>
+                  <option value="medium">Media</option>
+                  <option value="low">Baja</option>
+                </select>
+              </div>
             </div>
           </div>
-        </motion.div>
 
-        {tickets.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200"
-          >
-            <TicketIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No hay tickets disponibles</p>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
+          {/* Tickets List */}
+          <div className="space-y-4">
             {tickets.map((ticket, index) => (
-              <Card
+              <motion.div
                 key={ticket._id}
-                ticket={ticket}
-                onViewDetail={handleViewDetail}
-                onUpdateStatus={handleUpdateStatus}
-                userRole="agent"
-                showActions={true}
-                index={index}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => handleViewDetail(ticket._id)}
+                className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-slate-600 cursor-pointer transition-colors"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-blue-400 font-semibold">#{ticket._id.slice(-3).toUpperCase()}</span>
+                      <Badge type="status" value={ticket.status} />
+                      <Badge type="priority" value={ticket.priority} />
+                    </div>
+                    <h3 className="text-white font-semibold text-lg mb-2">{ticket.title}</h3>
+                    <p className="text-slate-400 text-sm line-clamp-2">{ticket.description}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <ClockIcon className="h-4 w-4" />
+                    {formatTimeAgo(ticket.createdAt)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                    {commentsCount[ticket._id] || 0} comentarios
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <UserIcon className="h-4 w-4" />
+                    {getAssignedName(ticket)}
+                  </span>
+                </div>
+              </motion.div>
             ))}
-          </motion.div>
-        )}
-      </main>
+          </div>
+
+          {tickets.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-slate-400 text-lg">No hay tickets disponibles</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
