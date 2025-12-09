@@ -103,10 +103,24 @@ export async function POST(request: NextRequest) {
     
     // Send email notification to the email provided in the form
     try {
+      console.log('Attempting to send email to:', email);
+      console.log('Email config check:', {
+        hasHost: !!process.env.EMAIL_HOST,
+        hasUser: !!process.env.EMAIL_USER,
+        hasPass: !!process.env.EMAIL_PASS,
+      });
+      
       await sendTicketCreatedEmail(email, ticket.title, ticket._id.toString());
-    } catch (emailError) {
+      console.log('Email sent successfully to:', email);
+    } catch (emailError: any) {
       console.error('Error sending email:', emailError);
-      // Don't fail the request if email fails
+      console.error('Email error details:', {
+        message: emailError.message,
+        code: emailError.code,
+        response: emailError.response,
+      });
+      // Log but don't fail the request if email fails
+      // The ticket was created successfully
     }
     
     return NextResponse.json(populatedTicket, { status: 201 });

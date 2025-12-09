@@ -6,10 +6,12 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ticket } from '@/types';
 import { ticketService } from '@/services/api';
-import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import CreateTicketModal from '@/components/CreateTicketModal';
-import { PlusIcon, TicketIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import Sidebar from '@/components/Sidebar';
+import Badge from '@/components/ui/Badge';
+import { PlusIcon, ClockIcon, UserIcon, ArrowRightIcon, TicketIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import Card from '@/components/ui/Card';
 import toast from 'react-hot-toast';
 
 export default function ClientDashboard() {

@@ -1,13 +1,34 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+// Crear transporter con verificación de configuración
+const createTransporter = () => {
+  if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn('Email configuration incomplete. Email sending will fail.');
+  }
+
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false, // Para desarrollo, en producción debería ser true
+    },
+  });
+};
+
+const transporter = createTransporter();
+
+// Verificar conexión al inicializar
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Email transporter verification failed:', error);
+  } else {
+    console.log('Email transporter is ready to send emails');
+  }
 });
 
 export interface EmailOptions {
@@ -18,19 +39,47 @@ export interface EmailOptions {
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
   try {
+    // Verificar configuración de email
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn('Email configuration not found. Skipping email send.');
-      return;
+      const errorMsg = 'Email configuration not found. Please configure EMAIL_USER and EMAIL_PASS in .env.local';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
     }
 
-    await transporter.sendMail({
+    if (!process.env.EMAIL_HOST) {
+      const errorMsg = 'EMAIL_HOST not configured';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    console.log('Sending email with config:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      user: process.env.EMAIL_USER,
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to: options.to,
+    });
+
+    const result = await transporter.sendMail({
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to: options.to,
       subject: options.subject,
       html: options.html,
     });
-  } catch (error) {
-    console.error('Error sending email:', error);
+
+    console.log('Email sent successfully:', {
+      messageId: result.messageId,
+      to: options.to,
+    });
+  } catch (error: any) {
+    console.error('Error sending email - Full error:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack,
+    });
     throw error;
   }
 };

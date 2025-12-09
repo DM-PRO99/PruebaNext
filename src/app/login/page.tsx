@@ -80,8 +80,8 @@ export default function LoginPage() {
             transition={{ delay: 0.2, type: "spring" }}
             className="mx-auto h-16 w-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg mb-4"
           >
-            <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 1a9 9 0 0 0-9 9v7c0 1.657 1.343 3 3 3h1v-8H5c-.552 0-1-.448-1-1 0-4.418 3.582-8 8-8s8 3.582 8 8c0 .552-.448 1-1 1h-2v8h1c1.657 0 3-1.343 3-3v-7a9 9 0 0 0-9-9z"/>
+            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
           </motion.div>
           <h1 className="text-4xl font-bold text-white mb-2">HelpDeskPro</h1>
