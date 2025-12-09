@@ -1,301 +1,301 @@
-# HelpDeskPro - Sistema de Gestión de Tickets
+# HelpDeskPro - Ticket Management System
 
-Sistema completo de gestión de tickets de soporte técnico desarrollado con Next.js, TypeScript, MongoDB y Mongoose. Permite a los clientes crear tickets de soporte y a los agentes gestionarlos de manera eficiente.
+Complete support ticket management system developed with Next.js, TypeScript, MongoDB, and Mongoose. Allows clients to create support tickets and agents to manage them efficiently.
 
-## 📋 Descripción General
+## 📋 Overview
 
-HelpDeskPro es una aplicación web interna que digitaliza y optimiza la gestión de tickets de soporte, resolviendo problemas como:
-- Falta de registro centralizado de tickets
-- Pérdida de correos o respuestas tardías
-- Ausencia de seguimiento claro del estado de cada ticket
-- Falta de priorización y recordatorios para agentes
-- Imposibilidad de medir tiempos de respuesta y estados globales
+HelpDeskPro is an internal web application that digitizes and optimizes support ticket management, solving problems such as:
+- Lack of centralized ticket registry
+- Lost emails or delayed responses
+- Absence of clear tracking of each ticket's status
+- Lack of prioritization and reminders for agents
+- Inability to measure response times and global statuses
 
-## 🚀 Tecnologías Utilizadas
+## 🚀 Technologies Used
 
 - **Frontend:**
   - Next.js 16.0.8 (App Router)
   - React 19.2.1
   - TypeScript 5
   - Tailwind CSS 4
-  - Context API para gestión de estado
+  - Context API for state management
 
 - **Backend:**
   - Next.js API Routes
-  - MongoDB con Mongoose
-  - JWT para autenticación
-  - bcryptjs para hash de contraseñas
+  - MongoDB with Mongoose
+  - JWT for authentication
+  - bcryptjs for password hashing
 
-- **Servicios:**
-  - Axios para peticiones HTTP
-  - Nodemailer para envío de correos
-  - node-cron para tareas programadas
+- **Services:**
+  - Axios for HTTP requests
+  - Nodemailer for email sending
+  - node-cron for scheduled tasks
 
-## ✨ Funcionalidades Principales
+## ✨ Main Features
 
-### 3.1 Gestión de Tickets
-- ✅ Crear nuevos tickets desde el panel de cliente
-- ✅ Editar/actualizar estado, prioridad y agente asignado desde el panel de agente
-- ✅ Cerrar tickets cambiando su estado a "closed"
-- ✅ Listar tickets con filtros:
-  - Clientes: solo sus propios tickets
-  - Agentes: todos los tickets con filtros por estado y prioridad
-- ✅ Formularios controlados y tipados en TypeScript
+### 3.1 Ticket Management
+- ✅ Create new tickets from the client panel
+- ✅ Edit/update status, priority, and assigned agent from the agent panel
+- ✅ Close tickets by changing their status to "closed"
+- ✅ List tickets with filters:
+  - Clients: only their own tickets
+  - Agents: all tickets with filters by status and priority
+- ✅ Controlled and typed forms in TypeScript
 
-### 3.2 Autenticación y Roles
-- ✅ Módulo de login con validación de credenciales
-- ✅ Dos roles: `client` y `agent`
-- ✅ Redirección automática según rol después del login
-- ✅ Protección de rutas basada en roles
-- ✅ Context API para gestión de estado de autenticación
+### 3.2 Authentication and Roles
+- ✅ Login module with credential validation
+- ✅ Two roles: `client` and `agent`
+- ✅ Automatic redirection based on role after login
+- ✅ Role-based route protection
+- ✅ Context API for authentication state management
 
-### 3.3 Comentarios y Respuestas
-- ✅ Sistema de comentarios por ticket
-- ✅ Clientes pueden agregar comentarios a sus tickets
-- ✅ Agentes pueden responder tickets con comentarios
-- ✅ Visualización cronológica de comentarios
+### 3.3 Comments and Responses
+- ✅ Comment system per ticket
+- ✅ Clients can add comments to their tickets
+- ✅ Agents can respond to tickets with comments
+- ✅ Chronological display of comments
 
-### 3.4 Componentes UI Reutilizables
-- ✅ **Button**: Variantes (primary, secondary, danger, outline) y tamaños (sm, md, lg)
-- ✅ **Badge**: Para estados y prioridades con colores diferenciados
-- ✅ **Card**: Para mostrar resumen de tickets con badges y botones integrados
+### 3.4 Reusable UI Components
+- ✅ **Button**: Variants (primary, secondary, danger, outline) and sizes (sm, md, lg)
+- ✅ **Badge**: For statuses and priorities with differentiated colors
+- ✅ **Card**: To display ticket summaries with integrated badges and buttons
 
-### 3.5 API y Servicios
-- ✅ Modelos Mongoose: User, Ticket, Comment
-- ✅ API Routes completas:
-  - `/api/auth/login` - Autenticación
-  - `/api/auth/register` - Registro de usuarios
-  - `/api/auth/me` - Obtener usuario actual
-  - `/api/tickets` - CRUD de tickets
-  - `/api/tickets/[id]` - Operaciones específicas de ticket
-  - `/api/comments` - Gestión de comentarios
-- ✅ Servicios Axios tipados para consumo de APIs
-- ✅ Dashboard de agente con estadísticas y filtros
+### 3.5 API and Services
+- ✅ Mongoose models: User, Ticket, Comment
+- ✅ Complete API Routes:
+  - `/api/auth/login` - Authentication
+  - `/api/auth/register` - User registration
+  - `/api/auth/me` - Get current user
+  - `/api/tickets` - Ticket CRUD
+  - `/api/tickets/[id]` - Specific ticket operations
+  - `/api/comments` - Comment management
+- ✅ Typed Axios services for API consumption
+- ✅ Agent dashboard with statistics and filters
 
-### 3.6 Notificaciones por Correo
-- ✅ Envío automático de correos cuando:
-  - Se crea un ticket (al cliente)
-  - Un agente responde un ticket (al cliente)
-  - Un ticket se cierra (al cliente)
+### 3.6 Email Notifications
+- ✅ Automatic email sending when:
+  - A ticket is created (to the client)
+  - An agent responds to a ticket (to the client)
+  - A ticket is closed (to the client)
 
 ### 3.7 Cron Jobs
-- ✅ Endpoint `/api/cron/reminders` para detectar tickets sin respuesta
-- ✅ Envía recordatorios a agentes sobre tickets pendientes (24+ horas sin actualizar)
+- ✅ Endpoint `/api/cron/reminders` to detect unanswered tickets
+- ✅ Sends reminders to agents about pending tickets (24+ hours without update)
 
-### 3.8 Manejo de Errores y Validaciones
-- ✅ Try/catch en servicios Axios y rutas API
-- ✅ Mensajes de error y éxito claros al usuario
-- ✅ Validaciones:
-  - Título y descripción obligatorios
-  - No permitir crear tickets sin autenticación
-  - Respeto de roles en cada operación
+### 3.8 Error Handling and Validations
+- ✅ Try/catch in Axios services and API routes
+- ✅ Clear error and success messages to users
+- ✅ Validations:
+  - Title and description required
+  - Do not allow creating tickets without authentication
+  - Role respect in each operation
 
-## 📦 Requisitos Previos
+## 📦 Prerequisites
 
 - Node.js 18+ 
-- MongoDB (local o MongoDB Atlas)
-- Cuenta de email para envío de correos (Gmail, SendGrid, etc.)
+- MongoDB (local or MongoDB Atlas)
+- Email account for sending emails (Gmail, SendGrid, etc.)
 
-## 🔧 Instalación y Configuración
+## 🔧 Installation and Configuration
 
-### 1. Clonar el Repositorio
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/DM-PRO99/PruebaNext.git
 cd PruebaNext/pruebanext
 ```
 
-### 2. Instalar Dependencias
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configurar Variables de Entorno
+### 3. Configure Environment Variables
 
-Crear un archivo `.env.local` en la raíz del proyecto:
+Create a `.env.local` file in the project root:
 
 ```env
 # MongoDB Connection
 MONGODB_URI=mongodb://localhost:27017/helpdeskpro
-# O para MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/helpdeskpro
+# Or for MongoDB Atlas:
+# MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/helpdeskpro
 
-# JWT Secret (cambiar en producción)
-JWT_SECRET=tu-secret-jwt-super-seguro-cambiar-en-produccion
+# JWT Secret (change in production)
+JWT_SECRET=your-super-secure-jwt-secret-change-in-production
 
 # Email Configuration (Nodemailer)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=tu-email@gmail.com
-EMAIL_PASS=tu-app-password
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
 EMAIL_FROM=HelpDeskPro <noreply@helpdeskpro.com>
 
-# Cron Secret (para proteger endpoint de cron)
-CRON_SECRET=tu-secret-cron
+# Cron Secret (to protect cron endpoint)
+CRON_SECRET=your-cron-secret
 ```
 
-**Nota para Gmail:**
-- Necesitas generar una "App Password" en tu cuenta de Google
-- Ve a: Google Account → Security → 2-Step Verification → App passwords
+**Note for Gmail:**
+- You need to generate an "App Password" in your Google account
+- Go to: Google Account → Security → 2-Step Verification → App passwords
 
-### 4. Inicializar Base de Datos
+### 4. Initialize Database
 
-**⚠️ IMPORTANTE:** MongoDB crea automáticamente la base de datos cuando se realiza la primera operación de escritura. No necesitas crear la base de datos manualmente.
+**⚠️ IMPORTANT:** MongoDB automatically creates the database when the first write operation is performed. You don't need to create the database manually.
 
-**Pasos:**
-1. Asegúrate de que MongoDB esté corriendo (local o Atlas)
-2. La base de datos `helpdeskpro` se creará automáticamente cuando:
-   - Registres el primer usuario
-   - Crees el primer ticket
-   - O ejecutes cualquier operación de escritura
+**Steps:**
+1. Make sure MongoDB is running (local or Atlas)
+2. The `helpdeskpro` database will be created automatically when:
+   - You register the first user
+   - You create the first ticket
+   - Or you execute any write operation
 
-**Para crear usuarios de prueba:**
+**To create test users:**
 ```bash
-# Opción 1: Usar el script de inicialización
+# Option 1: Use the initialization script
 npm run init-users
 
-# Opción 2: Usar la API de registro (ver sección siguiente)
-# Opción 3: Usar MongoDB Compass o mongo shell
+# Option 2: Use the registration API (see next section)
+# Option 3: Use MongoDB Compass or mongo shell
 ```
 
-### 5. Ejecutar el Proyecto
+### 5. Run the Project
 
 ```bash
 npm run dev
 ```
 
-La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
+The application will be available at [http://localhost:3000](http://localhost:3000)
 
-## 👥 Crear Usuarios de Prueba
+## 👥 Create Test Users
 
-Puedes crear usuarios de prueba usando la API de registro o directamente en MongoDB:
+You can create test users using the registration API or directly in MongoDB:
 
-### Opción 1: Usando la API (desde Postman o curl)
+### Option 1: Using the API (from Postman or curl)
 
 ```bash
-# Crear cliente
+# Create client
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Cliente Prueba",
-    "email": "cliente@test.com",
+    "name": "Test Client",
+    "email": "client@test.com",
     "password": "123456",
     "role": "client"
   }'
 
-# Crear agente
+# Create agent
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Agente Prueba",
-    "email": "agente@test.com",
+    "name": "Test Agent",
+    "email": "agent@test.com",
     "password": "123456",
     "role": "agent"
   }'
 ```
 
-### Opción 2: Script de Inicialización
+### Option 2: Initialization Script
 
-Crear un archivo `scripts/init-users.ts` (opcional):
+Create a `scripts/init-users.ts` file (optional):
 
 ```typescript
-// Ejecutar con: npx ts-node scripts/init-users.ts
+// Run with: npx ts-node scripts/init-users.ts
 ```
 
-## 🎯 Flujo de Uso
+## 🎯 Usage Flow
 
-### Para Clientes:
+### For Clients:
 
-1. **Login**: Acceder con credenciales de cliente
-2. **Crear Ticket**: Desde el dashboard, hacer clic en "Crear Nuevo Ticket"
-3. **Ver Tickets**: Lista de todos sus tickets con estado y prioridad
-4. **Ver Detalle**: Hacer clic en "Ver Detalle" para ver y agregar comentarios
-5. **Recibir Notificaciones**: Correos automáticos cuando el agente responde o cierra el ticket
+1. **Login**: Access with client credentials
+2. **Create Ticket**: From the dashboard, click "Create New Ticket"
+3. **View Tickets**: List of all their tickets with status and priority
+4. **View Detail**: Click "View Detail" to see and add comments
+5. **Receive Notifications**: Automatic emails when the agent responds or closes the ticket
 
-### Para Agentes:
+### For Agents:
 
-1. **Login**: Acceder con credenciales de agente
-2. **Dashboard**: Ver estadísticas y todos los tickets
-3. **Filtrar**: Usar filtros por estado y prioridad
-4. **Gestionar Tickets**: 
-   - Ver detalle del ticket
-   - Cambiar estado (abierto → en progreso → resuelto → cerrado)
-   - Cambiar prioridad
-   - Responder con comentarios
-5. **Recordatorios**: Recibir correos automáticos sobre tickets sin respuesta
+1. **Login**: Access with agent credentials
+2. **Dashboard**: View statistics and all tickets
+3. **Filter**: Use filters by status and priority
+4. **Manage Tickets**: 
+   - View ticket detail
+   - Change status (open → in progress → resolved → closed)
+   - Change priority
+   - Respond with comments
+5. **Reminders**: Receive automatic emails about unanswered tickets
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 pruebanext/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── auth/          # Rutas de autenticación
-│   │   │   ├── tickets/        # Rutas de tickets
-│   │   │   ├── comments/       # Rutas de comentarios
+│   │   │   ├── auth/          # Authentication routes
+│   │   │   ├── tickets/        # Ticket routes
+│   │   │   ├── comments/       # Comment routes
 │   │   │   └── cron/          # Cron jobs
-│   │   ├── client/            # Panel de cliente
+│   │   ├── client/            # Client panel
 │   │   │   ├── dashboard/
 │   │   │   └── tickets/[id]/
-│   │   ├── agent/             # Panel de agente
+│   │   ├── agent/             # Agent panel
 │   │   │   ├── dashboard/
 │   │   │   └── tickets/[id]/
-│   │   ├── login/             # Página de login
-│   │   ├── layout.tsx         # Layout principal con AuthProvider
-│   │   └── page.tsx           # Página principal (redirección)
+│   │   ├── login/             # Login page
+│   │   ├── layout.tsx         # Main layout with AuthProvider
+│   │   └── page.tsx           # Main page (redirection)
 │   ├── components/
-│   │   ├── ui/                # Componentes reutilizables
+│   │   ├── ui/                # Reusable components
 │   │   │   ├── Button.tsx
 │   │   │   ├── Badge.tsx
 │   │   │   └── Card.tsx
 │   │   └── CreateTicketModal.tsx
 │   ├── contexts/
-│   │   └── AuthContext.tsx    # Context de autenticación
+│   │   └── AuthContext.tsx    # Authentication context
 │   ├── lib/
-│   │   ├── mongodb.ts         # Conexión a MongoDB
-│   │   ├── auth.ts            # Utilidades de autenticación
-│   │   └── email.ts           # Servicio de correo
+│   │   ├── mongodb.ts         # MongoDB connection
+│   │   ├── auth.ts            # Authentication utilities
+│   │   └── email.ts           # Email service
 │   ├── models/
-│   │   ├── User.ts            # Modelo de usuario
-│   │   ├── Ticket.ts          # Modelo de ticket
-│   │   └── Comment.ts         # Modelo de comentario
+│   │   ├── User.ts            # User model
+│   │   ├── Ticket.ts          # Ticket model
+│   │   └── Comment.ts         # Comment model
 │   ├── services/
-│   │   └── api.ts              # Servicios Axios
+│   │   └── api.ts              # Axios services
 │   └── types/
-│       └── index.ts           # Tipos TypeScript
-├── .env.local                  # Variables de entorno (no commitear)
-├── .env.local.example          # Ejemplo de variables de entorno
+│       └── index.ts           # TypeScript types
+├── .env.local                  # Environment variables (do not commit)
+├── .env.local.example          # Environment variables example
 ├── package.json
 └── README.md
 ```
 
-## 🔐 Seguridad
+## 🔐 Security
 
-- Contraseñas hasheadas con bcryptjs
-- Autenticación JWT con expiración de 7 días
-- Protección de rutas basada en roles
-- Validación de datos en servidor
-- Sanitización de inputs
+- Passwords hashed with bcryptjs
+- JWT authentication with 7-day expiration
+- Role-based route protection
+- Server-side data validation
+- Input sanitization
 
-## 📧 Configuración de Correos
+## 📧 Email Configuration
 
-El sistema envía correos automáticos en estos eventos:
-- **Creación de ticket**: Al cliente que creó el ticket
-- **Respuesta de agente**: Al cliente cuando un agente comenta
-- **Cierre de ticket**: Al cliente cuando el ticket se cierra
-- **Recordatorios**: A agentes sobre tickets sin respuesta (cron job)
+The system sends automatic emails on these events:
+- **Ticket creation**: To the client who created the ticket
+- **Agent response**: To the client when an agent comments
+- **Ticket closure**: To the client when the ticket is closed
+- **Reminders**: To agents about unanswered tickets (cron job)
 
 ## ⏰ Cron Jobs
 
-El endpoint `/api/cron/reminders` debe ser llamado periódicamente (cada hora o diariamente) por un servicio de cron externo como:
+The `/api/cron/reminders` endpoint must be called periodically (hourly or daily) by an external cron service such as:
 - Vercel Cron
 - cron-job.org
 - GitHub Actions
-- Servidor propio con node-cron
+- Own server with node-cron
 
-**Ejemplo de configuración en Vercel:**
+**Example Vercel configuration:**
 
 ```json
 {
@@ -308,58 +308,58 @@ El endpoint `/api/cron/reminders` debe ser llamado periódicamente (cada hora o 
 
 ## 🧪 Testing
 
-Para probar el sistema:
+To test the system:
 
-1. Crear un usuario cliente y un usuario agente
-2. Iniciar sesión como cliente y crear un ticket
-3. Iniciar sesión como agente y gestionar el ticket
-4. Verificar que se reciben los correos de notificación
+1. Create a client user and an agent user
+2. Log in as client and create a ticket
+3. Log in as agent and manage the ticket
+4. Verify that notification emails are received
 
-## 🐛 Solución de Problemas
+## 🐛 Troubleshooting
 
-### Error de conexión a MongoDB
-- Verificar que MongoDB esté corriendo
-- Verificar la URI en `.env.local`
-- Para MongoDB Atlas, verificar la IP whitelist
+### MongoDB connection error
+- Verify that MongoDB is running
+- Verify the URI in `.env.local`
+- For MongoDB Atlas, verify the IP whitelist
 
-### Error al enviar correos
-- Verificar credenciales de email en `.env.local`
-- Para Gmail, usar App Password, no la contraseña normal
-- Verificar que el puerto 587 no esté bloqueado
+### Email sending error
+- Verify email credentials in `.env.local`
+- For Gmail, use App Password, not the normal password
+- Verify that port 587 is not blocked
 
-### Error de autenticación
-- Verificar que JWT_SECRET esté configurado
-- Limpiar localStorage del navegador
-- Verificar que el token no haya expirado
+### Authentication error
+- Verify that JWT_SECRET is configured
+- Clear browser localStorage
+- Verify that the token has not expired
 
-## 📸 Capturas de Pantalla
+## 📸 Screenshots
 
-### Flujo Principal:
+### Main Flow:
 
-1. **Login**: Página de inicio de sesión
-2. **Dashboard Cliente**: Lista de tickets del cliente con opción de crear nuevos
-3. **Crear Ticket**: Modal para crear nuevo ticket con título, descripción y prioridad
-4. **Detalle Ticket Cliente**: Vista detallada con comentarios y opción de agregar más
-5. **Dashboard Agente**: Estadísticas, filtros y lista de todos los tickets
-6. **Gestionar Ticket Agente**: Vista detallada con opciones de cambiar estado, prioridad y responder
+1. **Login**: Login page
+2. **Client Dashboard**: List of client tickets with option to create new ones
+3. **Create Ticket**: Modal to create new ticket with title, description and priority
+4. **Client Ticket Detail**: Detailed view with comments and option to add more
+5. **Agent Dashboard**: Statistics, filters and list of all tickets
+6. **Agent Manage Ticket**: Detailed view with options to change status, priority and respond
 
-## 📝 Datos del Coder
+## 📝 Coder Information
 
-- **Nombre**: Diego Alejandro Mena Ciceri
+- **Name**: Diego Alejandro Mena Ciceri
 - **Clan**: Gosling
-- **Correo**: diegomena903@gmail.com
-- **Documento de Identidad**: 1109290022
+- **Email**: diegomena903@gmail.com
+- **ID Number**: 1109290022
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto fue desarrollado como prueba de desempeño.
+This project was developed as a performance test.
 
-## 🙏 Agradecimientos
+## 🙏 Acknowledgments
 
-- Next.js por el framework
-- MongoDB por la base de datos
-- Tailwind CSS por los estilos
+- Next.js for the framework
+- MongoDB for the database
+- Tailwind CSS for the styles
 
 ---
 
-**Desarrollado con  usando Next.js y TypeScript**
+**Developed with Next.js and TypeScript**
