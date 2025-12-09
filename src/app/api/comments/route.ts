@@ -109,18 +109,16 @@ export async function POST(request: NextRequest) {
       .populate('author', 'name email role');
     
     // Send email notification if agent is responding
-    if (authUser.role === 'agent') {
-      const createdBy = ticket.createdBy as any;
-      if (createdBy && typeof createdBy === 'object' && 'email' in createdBy && createdBy.email) {
-        try {
-          await sendTicketResponseEmail(
-            createdBy.email,
-            ticket.title,
-            message
-          );
-        } catch (emailError) {
-          console.error('Error sending email:', emailError);
-        }
+    // Use the email from the ticket (from the form) for notifications
+    if (authUser.role === 'agent' && ticket.email) {
+      try {
+        await sendTicketResponseEmail(
+          ticket.email,
+          ticket.title,
+          message
+        );
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
       }
     }
     

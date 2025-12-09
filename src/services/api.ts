@@ -30,7 +30,7 @@ export const ticketService = {
     return response.data;
   },
   
-  create: async (data: { title: string; description: string; priority: string }): Promise<Ticket> => {
+  create: async (data: { title: string; description: string; email: string; priority: string }): Promise<Ticket> => {
     const response = await api.post('/tickets', data);
     return response.data;
   },

@@ -6,6 +6,7 @@ export type TicketPriority = 'low' | 'medium' | 'high';
 export interface ITicket extends Document {
   title: string;
   description: string;
+  email: string;
   createdBy: mongoose.Types.ObjectId;
   assignedTo?: mongoose.Types.ObjectId;
   status: TicketStatus;
@@ -26,6 +27,13 @@ const TicketSchema: Schema = new Schema(
       type: String,
       required: [true, 'Description is required'],
       trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
     },
     createdBy: {
       type: Schema.Types.ObjectId,

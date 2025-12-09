@@ -104,10 +104,10 @@ export async function PUT(
     
     // Send email if ticket is closed
     if (status === 'closed' && ticket.status !== 'closed') {
-      const user = await User.findById(ticket.createdBy);
-      if (user && user.email) {
+      // Use the email from the ticket (from the form) instead of user email
+      if (ticket.email) {
         try {
-          await sendTicketClosedEmail(user.email, ticket.title);
+          await sendTicketClosedEmail(ticket.email, ticket.title);
         } catch (emailError) {
           console.error('Error sending email:', emailError);
         }

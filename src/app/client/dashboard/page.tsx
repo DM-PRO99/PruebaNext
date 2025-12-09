@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ticket } from '@/types';
 import { ticketService } from '@/services/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import CreateTicketModal from '@/components/CreateTicketModal';
+import { PlusIcon, TicketIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 export default function ClientDashboard() {
   const { user, isLoading: authLoading } = useAuth();
@@ -38,7 +41,9 @@ export default function ClientDashboard() {
       const data = await ticketService.getAll();
       setTickets(data);
     } catch (err: any) {
-      setError(err.message || 'Error al cargar tickets');
+      const errorMsg = err.message || 'Error al cargar tickets';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -50,6 +55,7 @@ export default function ClientDashboard() {
 
   const handleTicketCreated = () => {
     setShowCreateModal(false);
+    toast.success('Ticket creado exitosamente');
     loadTickets();
   };
 
@@ -74,18 +80,32 @@ export default function ClientDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <nav className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <h1 className="text-xl font-semibold text-gray-900">HelpDeskPro - Panel Cliente</h1>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <TicketIcon className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                HelpDeskPro
+              </h1>
+            </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Hola, {user.name}</span>
-              <Button variant="outline" size="sm" onClick={() => {
-                localStorage.removeItem('token');
-                router.push('/login');
-              }}>
-                Cerrar Sesión
+              <span className="text-sm font-medium text-gray-700">Hola, <span className="text-blue-600">{user.name}</span></span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  toast.success('Sesión cerrada');
+                  router.push('/login');
+                }}
+                className="flex items-center gap-2"
+              >
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                Salir
               </Button>
             </div>
           </div>
@@ -93,37 +113,55 @@ export default function ClientDashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Mis Tickets</h2>
-          <Button variant="primary" onClick={handleCreateTicket}>
-            + Crear Nuevo Ticket
-          </Button>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-center mb-8"
+        >
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Mis Tickets</h2>
+            <p className="text-gray-600 mt-1">Gestiona tus solicitudes de soporte</p>
           </div>
-        )}
+          <Button 
+            variant="primary" 
+            onClick={handleCreateTicket}
+            className="flex items-center gap-2"
+          >
+            <PlusIcon className="h-5 w-5" />
+            Crear Nuevo Ticket
+          </Button>
+        </motion.div>
 
         {tickets.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No tienes tickets aún</p>
-            <Button variant="primary" className="mt-4" onClick={handleCreateTicket}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200"
+          >
+            <TicketIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg mb-2">No tienes tickets aún</p>
+            <p className="text-gray-400 text-sm mb-6">Crea tu primer ticket para comenzar</p>
+            <Button variant="primary" onClick={handleCreateTicket} className="flex items-center gap-2 mx-auto">
+              <PlusIcon className="h-5 w-5" />
               Crear tu primer ticket
             </Button>
-          </div>
+          </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tickets.map((ticket) => (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {tickets.map((ticket, index) => (
               <Card
                 key={ticket._id}
                 ticket={ticket}
                 onViewDetail={handleViewDetail}
                 userRole="client"
+                index={index}
               />
             ))}
-          </div>
+          </motion.div>
         )}
       </main>
 

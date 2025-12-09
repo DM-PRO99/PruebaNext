@@ -71,11 +71,20 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { title, description, priority } = await request.json();
+    const { title, description, email, priority } = await request.json();
     
-    if (!title || !description) {
+    if (!title || !description || !email) {
       return NextResponse.json(
-        { message: 'Título y descripción son requeridos' },
+        { message: 'Título, descripción y correo electrónico son requeridos' },
+        { status: 400 }
+      );
+    }
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { message: 'Por favor ingresa un correo electrónico válido' },
         { status: 400 }
       );
     }
@@ -83,6 +92,7 @@ export async function POST(request: NextRequest) {
     const ticket = await Ticket.create({
       title,
       description,
+      email,
       priority: priority || 'medium',
       createdBy: authUser.userId,
       status: 'open',
@@ -91,15 +101,12 @@ export async function POST(request: NextRequest) {
     const populatedTicket = await Ticket.findById(ticket._id)
       .populate('createdBy', 'name email');
     
-    // Send email notification
-    const user = await User.findById(authUser.userId);
-    if (user && user.email) {
-      try {
-        await sendTicketCreatedEmail(user.email, ticket.title, ticket._id.toString());
-      } catch (emailError) {
-        console.error('Error sending email:', emailError);
-        // Don't fail the request if email fails
-      }
+    // Send email notification to the email provided in the form
+    try {
+      await sendTicketCreatedEmail(email, ticket.title, ticket._id.toString());
+    } catch (emailError) {
+      console.error('Error sending email:', emailError);
+      // Don't fail the request if email fails
     }
     
     return NextResponse.json(populatedTicket, { status: 201 });

@@ -17,6 +17,7 @@ export interface Ticket {
   _id: string;
   title: string;
   description: string;
+  email: string;
   createdBy: string | User;
   assignedTo?: string | User;
   status: TicketStatus;
