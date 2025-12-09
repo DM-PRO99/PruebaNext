@@ -141,11 +141,22 @@ CRON_SECRET=tu-secret-cron
 
 ### 4. Inicializar Base de Datos
 
-Asegúrate de que MongoDB esté corriendo. Luego, puedes crear usuarios de prueba ejecutando:
+**⚠️ IMPORTANTE:** MongoDB crea automáticamente la base de datos cuando se realiza la primera operación de escritura. No necesitas crear la base de datos manualmente.
 
+**Pasos:**
+1. Asegúrate de que MongoDB esté corriendo (local o Atlas)
+2. La base de datos `helpdeskpro` se creará automáticamente cuando:
+   - Registres el primer usuario
+   - Crees el primer ticket
+   - O ejecutes cualquier operación de escritura
+
+**Para crear usuarios de prueba:**
 ```bash
-# Opción 1: Usar MongoDB Compass o mongo shell
-# Opción 2: Usar el script de inicialización (ver sección siguiente)
+# Opción 1: Usar el script de inicialización
+npm run init-users
+
+# Opción 2: Usar la API de registro (ver sección siguiente)
+# Opción 3: Usar MongoDB Compass o mongo shell
 ```
 
 ### 5. Ejecutar el Proyecto
