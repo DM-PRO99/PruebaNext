@@ -7,7 +7,7 @@ import User from '@/models/User';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -20,7 +20,8 @@ export async function GET(
       );
     }
     
-    const ticket = await Ticket.findById(params.id)
+    const { id } = await params;
+    const ticket = await Ticket.findById(id)
       .populate('createdBy', 'name email')
       .populate('assignedTo', 'name email');
     
@@ -51,7 +52,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -72,7 +73,8 @@ export async function PUT(
       );
     }
     
-    const ticket = await Ticket.findById(params.id);
+    const { id } = await params;
+    const ticket = await Ticket.findById(id);
     if (!ticket) {
       return NextResponse.json(
         { message: 'Ticket no encontrado' },
@@ -93,7 +95,7 @@ export async function PUT(
     }
     
     const updatedTicket = await Ticket.findByIdAndUpdate(
-      params.id,
+      id,
       updateData,
       { new: true }
     )
@@ -124,7 +126,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -145,7 +147,8 @@ export async function DELETE(
       );
     }
     
-    const ticket = await Ticket.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const ticket = await Ticket.findByIdAndDelete(id);
     
     if (!ticket) {
       return NextResponse.json(

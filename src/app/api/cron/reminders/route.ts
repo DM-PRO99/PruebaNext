@@ -32,12 +32,13 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
     
     for (const ticket of tickets) {
-      if (typeof ticket.assignedTo === 'object' && ticket.assignedTo?.email) {
+      const assignedTo = ticket.assignedTo as any;
+      if (assignedTo && typeof assignedTo === 'object' && 'email' in assignedTo && assignedTo.email) {
         try {
           const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #f59e0b;">Recordatorio: Ticket Pendiente</h2>
-              <p>Hola ${ticket.assignedTo.name},</p>
+              <p>Hola ${assignedTo.name},</p>
               <p>Este es un recordatorio de que tienes un ticket pendiente de respuesta:</p>
               <div style="background-color: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f59e0b;">
                 <p><strong>Título:</strong> ${ticket.title}</p>
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
           `;
           
           await sendEmail({
-            to: ticket.assignedTo.email,
+            to: assignedTo.email,
             subject: `Recordatorio: Ticket Pendiente - ${ticket.title}`,
             html,
           });
