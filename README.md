@@ -362,4 +362,4 @@ Este proyecto fue desarrollado como prueba de desempeño.
 
 ---
 
-**Desarrollado con ❤️ usando Next.js y TypeScript**
+**Desarrollado con  usando Next.js y TypeScript**

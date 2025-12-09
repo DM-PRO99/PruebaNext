@@ -163,7 +163,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Sección Demo */}
+          
           <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-gray-500 text-sm text-center mb-4">Demo: Acceso rápido</p>
             <div className="grid grid-cols-2 gap-3">
@@ -184,6 +184,19 @@ export default function LoginPage() {
                 Entrar como Agente
               </button>
             </div>
+          </div>
+
+          
+          <div className="mt-4 text-center">
+            <p className="text-gray-600 text-sm">
+              ¿No tienes cuenta?{' '}
+              <button
+                onClick={() => router.push('/register')}
+                className="text-blue-600 hover:text-blue-700 font-semibold"
+              >
+                Regístrate aquí
+              </button>
+            </p>
           </div>
         </motion.div>
       </motion.div>
